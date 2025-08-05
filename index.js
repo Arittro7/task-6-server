@@ -1,41 +1,21 @@
+// server/index.js
 require('dotenv').config();
-
 const express = require('express');
 const http = require('http');
-const { Server } = require('socket.io');
 const cors = require('cors');
 const presentationRoutes = require('./routes/presentations');
 const db = require('./db');
-const socketLogic = require('./socket');
 
 const app = express();
 const server = http.createServer(app);
 
+const io = require('./socket').init(server);
+
 const allowedOrigins = [
-  'http://localhost:5173',               
-  'https://presentation-itra.netlify.app' 
+  process.env.CLIENT_URL,
+  'http://localhost:5173'
 ];
-
-const corsOptions = {
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  optionsSuccessStatus: 200
-};
-
-app.use(cors(corsOptions));
-
-const io = new Server(server, {
-  cors: {
-    origin: allowedOrigins,
-    methods: ["GET", "POST"]
-  }
-});
-
+app.use(cors({ origin: allowedOrigins }));
 
 app.use(express.json());
 app.use('/api/presentations', presentationRoutes);
@@ -86,10 +66,3 @@ const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);
 });
-
-module.exports.getIo = () => {
-    if (!io) {
-        throw new Error('Socket.io not initialized!');
-    }
-    return io;
-};
