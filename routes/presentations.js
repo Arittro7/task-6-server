@@ -1,7 +1,7 @@
 const express = require('express');
 const db = require('../db');
 const router = express.Router();
-const { getIo } = require('../socket');
+const { getIo } = require('../index.js');
 
 router.get('/', async (req, res) => {
   try {
